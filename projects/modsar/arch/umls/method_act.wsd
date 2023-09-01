@@ -1,0 +1,98 @@
+@startuml com::method
+actor "Client" as Client
+participant "HelloMethodProxy" as HelloMethodProxy
+
+participant Proxy as Proxy
+participant BlockingCall as BlockingCall
+participant VsomeipClientApp as VsomeipClientApp
+participant VsomeipServerApp as VsomeipServerApp
+participant Skeleton as Skeleton
+participant HelloMethodSkeletonImplemation as HelloMethodSkeletonImplemation
+participant RpcServiceMethod as RpcServiceMethod
+actor "Server" as Server
+activate Client
+activate Server
+
+Server -> HelloMethodSkeletonImplemation: new(InstanceIdentifier)
+activate HelloMethodSkeletonImplemation
+note left : "生成代码"
+
+HelloMethodSkeletonImplemation->Skeleton:new(InstanceIdentifier)
+activate Skeleton
+Skeleton->VsomeipServerApp:new(InstanceIdentifier)
+activate VsomeipServerApp
+
+HelloMethodSkeletonImplemation -> HelloMethodSkeletonImplemation : actor(InstanceIdentifier)
+HelloMethodSkeletonImplemation->HelloMethodSkeletonImplemation : bindMethod(sayHello(rpc::Request &, rpc::Response *));
+HelloMethodSkeletonImplemation->RpcServiceMethod : addMethod(sayHello)
+
+ 
+Server -> Skeleton : OfferService()
+note left : "SWS_CM_00101"
+Skeleton -> Skeleton : wait
+Skeleton -> VsomeipServerApp : offerService
+VsomeipServerApp -> VsomeipServerApp : onValiable
+VsomeipServerApp -> Skeleton : Response(app_)
+Skeleton -> Skeleton : notify
+Skeleton --> HelloMethodSkeletonImplemation : Return
+HelloMethodSkeletonImplemation --> Server : HelloMethodSkeletonImplemation
+deactivate HelloMethodSkeletonImplemation
+
+Client -> Proxy : FindService(InstanceSpecifier)
+note right: "SWS_CM_00622"
+activate Proxy
+Proxy->VsomeipClientApp:new(InstanceIdentifier)
+activate VsomeipClientApp
+Proxy->Proxy:wait()
+
+VsomeipClientApp->VsomeipClientApp:onValiable
+VsomeipClientApp->Proxy:readyCallback
+Proxy->Proxy:notify()
+Proxy->HelloMethodProxy:new
+note left : "生成代码"
+activate HelloMethodProxy
+HelloMethodProxy --> Client
+
+
+Client -> HelloMethodProxy : sayHello("hello")->core::Futher<void>
+
+HelloMethodProxy->Proxy:SayHello(Request)
+
+Proxy-> BlockingCall
+activate BlockingCall
+
+BlockingCall -> BlockingCall : invoke
+BlockingCall -> VsomeipClientApp : SendRequest
+BlockingCall -> BlockingCall : wait
+VsomeipClientApp->VsomeipServerApp: app_->send(vsomeip_payload)
+
+VsomeipServerApp->VsomeipServerApp : methodCallback
+
+VsomeipServerApp -> RpcServiceMethod : RunHandler()
+activate RpcServiceMethod
+RpcServiceMethod -> RpcServiceMethod: sayHello("hello")
+RpcServiceMethod --> VsomeipServerApp : Response
+
+deactivate RpcServiceMethod
+
+VsomeipServerApp -> VsomeipClientApp : Response
+
+VsomeipClientApp->VsomeipClientApp : onMessageCallback
+VsomeipClientApp->BlockingCall: repsonse
+BlockingCall -> BlockingCall : notify()
+
+BlockingCall --> Proxy : Response
+
+deactivate BlockingCall
+
+Proxy -->HelloMethodProxy : Reponse<Stream>
+
+HelloMethodProxy-->Client: core::Result<void>
+
+
+
+
+
+
+
+@enduml

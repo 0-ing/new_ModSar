@@ -1,0 +1,200 @@
+@startuml core::types
+package ara.core {
+    class Variant<Types..>{ 
+        // SWS_CORE_01601
+    }
+    class Result<T=value_type,E=ErrorCode> {
+        // SWS_CORE_00701
+        -data_: Variant<T,E>;
+        +{static} value_type:T; // SWS_CORE_00711
+        +{static} error_type:E; // SWS_CORE_00712
+        +{static} Result FromeValue(T const &t); // SWS_CORE_00731
+        +{static} Result FromeValue(T &&t); // SWS_CORE_00732
+        +{static} Result FromValue(Args &&...args); // SWS_CORE_00733
+
+        +{static} Result FromError(E const& e); // SWS_CORE_00734
+        +{static} Result FromError(E&& e); // SWS_CORE_00735
+        +{static} Result FromError(Args&&... args) // SWS_CORE_00736
+
+        +Result(T Const &t); // SWS_CORE_00721
+        +Result(T &&t); // SWS_CORE_00722
+        
+        +explicit Result(E const &e); // SWS_CORE_00723
+        +explicit Result(E && e); // SWS_CORE_00724
+    }
+
+    class Result_<T=void,E> {
+        +{static} value_type : void; // SWS_CORE_00811
+        +{static} error_type : E; // SWS_CORE_00812
+        -data_:Variant<E>;
+    }
+
+    class Future<T,E> {  
+        // SWS_CORE_00321
+        + std::future<Result<T, E>> futher_;
+        +Future(); // SWS_CORE_00322
+        +Future(Future&& other); // SWS_CORE_00323
+        +Future& operator=(Future&& other); // SWS_CORE_00325
+        +~Future(); // SWS_CORE_00333
+        -Future(Future const&) = delete; // SWS_CORE_00334
+        -Future& operator=(Future const&) = delete;// SWS_CORE_00335
+ 
+        + Result<T, E> GetResult(); // SWS_CORE_00336
+        + T get(); // SWS_CORE_00326
+        + bool valid(); // SWS_CORE_00327
+        + void wait(); // SWS_CORE_00328
+        
+        +future_status wait_for<Rep, Period>(duration<Rep, Period> const& timeout_duration); // SWS_CORE_00329
+        +future_status wait_until(time_point<Clock, Duration> const& deadline) const; // SWS_CORE_00330
+
+      
+        + Future<T, E> then<F>(F&& func); // SWS_CORE_00331
+
+       
+    }
+    class Future_<void, E> {
+        // SWS_CORE_06221
+        + Future() noexcept = default; // SWS_CORE_06222
+        +~Future() noexcept = default; // SWS_CORE_06233
+        -Future(Future const& other) = delete; // SWS_CORE_06234
+        -Future& operator=(Future const&) = delete; // SWS_CORE_06235
+
+        +Future(Future&& other) noexcept; // SWS_CORE_06223
+       
+        +Future& operator=(Future&& other) noexcept; // SWS_CORE_06225
+    }
+
+   
+    class Promise<T,T=ErrorCode> {
+        // SWS_CORE_00340
+        +Promise(); // SWS_CORE_00341
+        +~Promise(); // SWS_CORE_00349
+        +Promise(Promise const&) = delete; // SWS_CORE_00350
+        +Promise& operator=(Promise const&) = delete; // SWS_CORE_00351
+        +Promise(Promise&& other) noexcept; // SWS_CORE_00342
+        +Promise& operator=(Promise&& other) noexcept; // SWS_CORE_00343
+        +void swap(Promise& other); //SWS_CORE_00352
+        +Future<T, E> get_future(); // SWS_CORE_00344
+        +void SetError(E&& err); // SWS_CORE_00353
+        +void SetError(E const& err);// SWS_CORE_00354
+
+        +void set_value(T&& value); // SWS_CORE_00346
+        +void set_value(T const& value); // SWS_CORE_00345
+        -promise_:std::promise<Result<void, E>>; 
+    }
+
+    class Promise_<void, E> {
+        // SWS_CORE_06340
+        +Promise(); // SWS_CORE_06341
+        +~Promise(); // SWS_CORE_06349
+        +Promise(Promise const&) = delete; // SWS_CORE_06350
+        +Promise& operator=(Promise const&) = delete; // SWS_CORE_06351
+        +Promise(Promise&& other) noexcept; // SWS_CORE_06342
+        +Promise& operator=(Promise&& other) noexcept; //SWS_CORE_06343
+        +void swap(Promise& other) noexcept; // SWS_CORE_06352
+        +Future<void, E> get_future(); // SWS_CORE_06344
+
+        +void set_value(); // SWS_CORE_06345
+        +void SetError(E&& err); // SWS_CORE_06353
+        +void SetError(E const& err); // SWS_CORE_06354
+        -promise_:std::promise<Result<void, E>>; 
+    }
+
+    class CodeDomain {
+        // SWS_CORE_00110
+        // SWS_CORE_10400
+         -mId:IdType;
+        +{static} IdType:std::uint64_t; // SWS_CORE_00121
+        +{static} CodeType: std::int32_t; // SWS_CORE_00122
+        +{static} SupportDataType: std::int32_t; // SWS_CORE_00123
+       
+        +constexpr explicit ErrorDomain(IdType id); // SWS_CORE_00135
+        + ~ErrorDomain() = default; // SWS_CORE_00136
+
+        +virtual char const* Message(CodeType errorCode); // SWS_CORE_00153
+
+   
+        + ErrorDomain(ErrorDomain const&) = delete; // SWS_CORE_00131
+
+ 
+        + ErrorDomain(ErrorDomain&&) = delete; // SWS_CORE_00132
+
+  
+        + ErrorDomain& operator=(ErrorDomain const&) = delete; // SWS_CORE_00133
+    
+        + virtual char const* Name() const noexcept = 0; // SWS_CORE_00152
+    }
+    class ErrorCode {
+        // SWS_CORE_10300
+        // SWS_CORE_00501
+
+        +ErrorCode<EnumT,ErrorDomain::SupportDataType>(EnumT e, SupportDataType data = 0); // SWS_CORE_00512
+        +ErrorCode(CodeType value, ErrorDomain const& domain, SupportDataType data = 0); // SWS_CORE_00513
+        +CodeType Value() const noexcept ; // SWS_CORE_00514
+        +SupportDataType SupportData(); // SWS_CORE_00516
+        +ErrorDomain const& Domain(); // SWS_CORE_00515
+        +StringView Message() const noexcept; //SWS_CORE_00518
+        +void ThrowAsException() const noexcept(false); // SWS_CORE_00519
+
+        - mValue:CodeType::CodeType;
+        - mSupportData:ErrorDomain::SupportDataType;
+        - mDomain:ErrorDomain const* ;
+
+        +bool operator==(ErrorCode const& lhs, ErrorCode const& rhs);//SWS_CORE_00571
+        +bool operator!=(ErrorCode const& lhs, ErrorCode const& rhs); // SWS_CORE_00572
+    }
+    class StringView {
+        // SWS_CORE_02001
+    }
+    class CoreErrorDomain {
+        /// @traceid{SWS_CORE_00010}
+        /// @traceid{SWS_CORE_00011}
+        /// @traceid{SWS_CORE_05221}
+        /// @traceid{SWS_CORE_10400}
+        /// @traceid{SWS_CORE_10930}
+        /// @traceid{SWS_CORE_10931}
+        /// @traceid{SWS_CORE_10932}
+        /// @traceid{SWS_CORE_10950}
+        /// @traceid{SWS_CORE_10999}
+
+    }
+
+    class FutureErrorDomain{
+        /// @traceid{SWS_CORE_00010}
+
+        /// @traceid{SWS_CORE_00011}
+        /// @traceid{SWS_CORE_00421}
+        /// @traceid{SWS_CORE_10400}
+        /// @traceid{SWS_CORE_10930}
+        /// @traceid{SWS_CORE_10931}
+        /// @traceid{SWS_CORE_10932}
+        /// @traceid{SWS_CORE_10950}
+        /// @traceid{SWS_CORE_10999}
+    }
+
+    class OptionalErrorDomain {
+        + char const *Name();
+        + char const *Message(ErrorDomain::CodeType errorCode);
+    }
+}
+
+Result o-- Variant
+Result_ ..|> Result
+
+Future o-- Result
+Future_ ..|> Future
+
+Promise_ ..|> Promise
+Promise o-- Result
+
+Promise ..> Future
+
+ErrorCode o-- CodeDomain
+ErrorCode o-- StringView
+
+Result o-- ErrorCode
+
+CodeDomain <|-- CoreErrorDomain
+CodeDomain <|-- FutureErrorDomain
+CodeDomain <|-- OptionalErrorDomain
+@enduml

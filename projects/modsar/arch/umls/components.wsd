@@ -1,0 +1,54 @@
+@startuml components
+
+node AppsLayer{
+     
+    [User Application]
+}
+
+
+node AutosarAP {
+    
+    frame "Communication Management"{
+        component "Someip" {
+            component "Vsomeip"  #Green
+            component "Dsomeip"
+        }
+        component "DDS" {
+            component "FastDDS" #Green
+            component "OpenDDS"
+        }
+        component "ZeroCopy" {
+            component "Iceoryx" #Green
+            component "eCAL"
+        }
+         
+    }
+    [RESTFUL]
+    frame "Core Types"  {
+        component "Future" #Green
+        component "Promise" #Green
+        component "Result" #Green
+        component "Variant" #Green
+    }
+    [Execution Management]
+}
+
+
+
+node "OS" {
+    frame "Operator System Interface" {
+        [Linux] #Green
+        [QNX] #Green
+    } 
+ }
+
+
+node "Hardware" {
+    component "S32G" #Green
+    component "X9h" #Green
+}
+AutosarAP -- OS
+AppsLayer  -- AutosarAP
+
+OS -- Hardware
+@enduml

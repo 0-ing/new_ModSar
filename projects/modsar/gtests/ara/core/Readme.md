@@ -1,0 +1,1 @@
+# core 的gtest 机制

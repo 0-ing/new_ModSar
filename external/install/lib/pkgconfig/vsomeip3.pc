@@ -1,0 +1,10 @@
+prefix=/home/hua/workspace/adaptive_autosar/ModSar/external/install
+exec_prefix=/home/hua/workspace/adaptive_autosar/ModSar/external/install
+libdir=/home/hua/workspace/adaptive_autosar/ModSar/external/install/lib
+includedir=/home/hua/workspace/adaptive_autosar/ModSar/external/install/include
+
+Name: vsomeip
+Description: New SOME/IP stack, feature complete
+Version: 3.3.8
+Libs: -L${libdir} -lvsomeip3
+Cflags: -I${includedir}

@@ -1,0 +1,29 @@
+@startuml collect
+package ara.core {
+
+    class Array {
+        /// @traceid{SWS_CORE_01201}
+        /// @traceid{SWS_CORE_11200}
+    }
+
+    class Vector {
+        /// @traceid{SWS_CORE_01301}
+    }
+
+    class String {
+        /// @traceid{SWS_CORE_03001}
+    }
+    class Map {
+        /// @traceid{SWS_CORE_01400}
+    }
+    class Set {
+
+    }
+    class Optional<T> {
+        // SWS_CORE_01033
+        +bool has_value();
+        +T& operator*();
+        + void swap(Optional<T>& x, Optional<T>& y); // SWS_CORE_01096
+    }
+}
+@enduml
